@@ -14,17 +14,12 @@ class Lead extends AbstractReporting
     protected array $stageIds;
 
     /**
-     * The all stage ids.
-     */
-    protected array $allStageIds;
-
-    /**
-     * The won stage ids.
+     * The channel ids.
      */
     protected array $wonStageIds;
 
     /**
-     * The lost stage ids.
+     * The channel ids.
      */
     protected array $lostStageIds;
 
@@ -37,11 +32,21 @@ class Lead extends AbstractReporting
         protected LeadRepository $leadRepository,
         protected StageRepository $stageRepository
     ) {
-        $this->allStageIds = $this->stageRepository->pluck('id')->toArray();
 
-        $this->wonStageIds = $this->stageRepository->where('code', 'won')->pluck('id')->toArray();
+        $this->wonStageIds = array_unique(array_merge(
+            $this->stageRepository
+                ->whereIn('code', ['won', 'pipeline.create.won-stage'])
+                ->orWhereIn('name', [__('pipeline.create.won-stage'), 'Ganho']) //FIX
+                ->pluck('id')->toArray()
+        ));
+        
+        $this->lostStageIds = array_unique(array_merge(
+            $this->stageRepository
+                ->whereIn('code', ['lost', 'pipeline.create.lost-stage'])
+                ->orWhereIn('name', [__('pipeline.create.lost-stage'), 'Perdido'])
+                ->pluck('id')->toArray()
+        ));
 
-        $this->lostStageIds = $this->stageRepository->where('code', 'lost')->pluck('id')->toArray();
 
         parent::__construct();
     }
@@ -53,7 +58,7 @@ class Lead extends AbstractReporting
      */
     public function getTotalLeadsOverTime($period = 'auto'): array
     {
-        $this->stageIds = $this->allStageIds;
+        $this->stageIds = [];
 
         return $this->getOverTimeStats($this->startDate, $this->endDate, 'leads.id', 'created_at', $period);
     }
@@ -349,3 +354,4 @@ class Lead extends AbstractReporting
         return $stats ?? [];
     }
 }
+ 

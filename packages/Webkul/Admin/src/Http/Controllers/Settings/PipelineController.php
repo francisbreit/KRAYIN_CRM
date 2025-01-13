@@ -46,22 +46,30 @@ class PipelineController extends Controller
     public function store(PipelineForm $request): RedirectResponse
     {
         $request->validated();
-
+    
+        // Adiciona as traduções para "Ganho" e "Perdido"
         $request->merge([
             'is_default' => request()->has('is_default') ? 1 : 0,
+            //'won_label'  => __('won-stage'),  // Tradução para "Ganho"
+            //'lost_label' => __('lost-stage'), // Tradução para "Perdido"
+            'won_label' => __('pipeline.create.won-stage'),
+            'lost_label' => __('pipeline.create.lost-stage'),
         ]);
-
+    
+        // Dispara evento antes da criação
         Event::dispatch('settings.pipeline.create.before');
-
+    
+        // Cria o pipeline com os dados fornecidos
         $pipeline = $this->pipelineRepository->create($request->all());
-
+    
+        // Dispara evento após a criação
         Event::dispatch('settings.pipeline.create.after', $pipeline);
-
+    
+        // Mensagem de sucesso
         session()->flash('success', trans('admin::app.settings.pipelines.index.create-success'));
-
+    
         return redirect()->route('admin.settings.pipelines.index');
-    }
-
+    }    
     /**
      * Show the form for editing the specified resource.
      */
@@ -78,21 +86,31 @@ class PipelineController extends Controller
     public function update(PipelineForm $request, int $id): RedirectResponse
     {
         $request->validated();
-
+    
+        // Adiciona as traduções para "Ganho" e "Perdido"
         $request->merge([
             'is_default' => request()->has('is_default') ? 1 : 0,
+            //'won_label'  => __('won-stage'),  // Tradução para "Ganho"
+            //'lost_label' => __('lost-stage'), // Tradução para "Perdido"
+            'won_label' => __('pipeline.create.won-stage'),
+            'lost_label' => __('pipeline.create.lost-stage'),
         ]);
-
+    
+        // Dispara evento antes da atualização
         Event::dispatch('settings.pipeline.update.before', $id);
-
+    
+        // Atualiza o pipeline com os dados fornecidos
         $pipeline = $this->pipelineRepository->update($request->all(), $id);
-
+    
+        // Dispara evento após a atualização
         Event::dispatch('settings.pipeline.update.after', $pipeline);
-
+    
+        // Mensagem de sucesso
         session()->flash('success', trans('admin::app.settings.pipelines.index.update-success'));
-
+    
         return redirect()->route('admin.settings.pipelines.index');
     }
+        
 
     /**
      * Remove the specified resource from storage.
@@ -133,5 +151,14 @@ class PipelineController extends Controller
         return response()->json([
             'message' => trans('admin::app.settings.pipelines.index.delete-failed'),
         ], 400);
+    }
+
+    public function show($id)
+    {
+        $pipeline = Pipeline::find($id);
+        $pipeline->stages = collect($pipeline->stages)->map(function ($stage) {
+        });
+    
+        return view('pipeline.show', compact('pipeline'));
     }
 }
