@@ -25,4 +25,22 @@ class TrustProxies extends Middleware
         Request::HEADER_X_FORWARDED_PORT |
         Request::HEADER_X_FORWARDED_PROTO |
         Request::HEADER_X_FORWARDED_AWS_ELB;
+
+    /**
+     * Handle an incoming request.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \Closure  $next
+     * @return \Illuminate\Http\Response
+     */
+    public function handle($request, \Closure $next)
+    {
+        $response = parent::handle($request, $next);
+
+        // Adiciona cabeçalhos para liberar o uso em iframes
+        $response->headers->set('X-Frame-Options', 'ALLOWALL');
+        $response->headers->set('Content-Security-Policy', "frame-ancestors *");
+
+        return $response;
+    }
 }
