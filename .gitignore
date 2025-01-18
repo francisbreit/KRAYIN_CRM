@@ -1,5 +1,4 @@
-Dockerfile
-docker-compose.yml
+env
 .env.testing
 .idea
 .php_cs.cache
@@ -7,7 +6,6 @@ docker-compose.yml
 .vscode
 .vagrant
 *.hot
-.configs/
 /stubs
 /data
 /docker-compose-collection
@@ -28,3 +26,4 @@ package-lock.json
 /vendor
 yarn.lock
 yarn-error.log
+Dockerfile

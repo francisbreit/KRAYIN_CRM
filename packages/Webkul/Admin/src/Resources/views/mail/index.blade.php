@@ -8,7 +8,7 @@
             <div class="flex flex-col gap-2">
                 <div class="flex cursor-pointer items-center">
                     {!! view_render_event('admin.mail.create.breadcrumbs.before') !!}
-                    
+
                     <!-- breadcrumbs -->
                     <x-admin::breadcrumbs
                         name="mail.route"
@@ -197,13 +197,9 @@
 
                                 <div class="flex w-full items-center justify-between gap-4">
                                     <!-- Content -->
-                                    <div class="flex items-center gap-2">
-
-                                        <!-- Attachments (retains space even if empty) -->
-                                        <p
-                                            v-if="record.attachments"
-                                            v-html="record.attachments"
-                                        ></p>
+                                    <div class="flex-frow flex items-center gap-2">
+                                        <!-- Attachments -->
+                                        <p v-html="record.attachments"></p>
 
                                         <!-- Tags -->
                                         <span
@@ -223,7 +219,11 @@
                                             <p class="line-clamp-1 text-sm text-gray-900 dark:text-gray-100" v-text="record.subject"></p>
 
                                             <!-- Reply (Content) -->
-                                            <p class="line-clamp-1 text-sm text-gray-500 dark:text-gray-400" v-html="truncatedReply(record.reply)"></p>
+                                            <p
+                                                class="!font-normal"
+                                                v-html="truncatedReply(record.reply)"
+                                            >
+                                            </p>
                                         </div>
                                     </div>
 
@@ -285,7 +285,7 @@
                                         :label="trans('admin::app.mail.index.mail.to')"
                                         :placeholder="trans('admin::app.mail.index.mail.enter-emails')"
                                     />
-                                    
+
                                     <div class="absolute top-[9px] flex items-center gap-2 ltr:right-2 rtl:left-2">
                                         <span
                                             class="cursor-pointer font-medium hover:underline dark:text-white"
@@ -497,7 +497,7 @@
                         if (reply.length > maxLength) {
                             return `${reply.substring(0, maxLength)}...`;
                         }
-                        
+
                         return reply;
                     },
 
@@ -561,7 +561,7 @@
                                 this.showCC = this.draft.cc.length > 0;
 
                                 this.showBCC = this.draft.bcc.length > 0;
-                                
+
                             })
                             .catch(error => {});
                     },
