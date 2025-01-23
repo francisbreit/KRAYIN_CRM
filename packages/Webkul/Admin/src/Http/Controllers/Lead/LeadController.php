@@ -204,7 +204,12 @@ public function view(int $id): View|RedirectResponse
     if (!in_array($lead->user_id, $userIds)) {
         return redirect()->route('admin.leads.index'); // Redireciona para a lista de leads
     }
-
+ if (
+            $userIds = bouncer()->getAuthorizedUserIds()
+            && ! in_array($lead->user_id, $userIds)
+        ) {
+            return redirect()->route('admin.leads.index');
+        }
 
     return view('admin::leads.view', compact('lead')); // Retorna a visualização do lead
 }
