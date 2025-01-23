@@ -202,16 +202,20 @@ public function view(int $id): View|RedirectResponse
     // Obtemos os IDs de usuários autorizados
     $userIds = bouncer()->getAuthorizedUserIds() ?? []; // Garante que $userIds seja sempre um array
 
-    // Permitir visualização se o usuário for admin ou se o lead estiver associado ao usuário
+    // Verifica se o usuário é admin
+    $isAdmin = auth()->user()->is('admin'); // Verifica o papel de admin do usuário
+
+    // Permitir visualização apenas se for admin ou o lead pertencer ao usuário autorizado
     if (
-        (!bouncer()->is(auth()->user())->an('admin')) && // Não é admin
-        (!in_array($lead->user_id, $userIds))           // E o lead não pertence ao usuário
+        !$isAdmin &&            // Não é admin
+        !in_array($lead->user_id, $userIds) // O lead não pertence ao usuário
     ) {
         return redirect()->route('admin.leads.index'); // Redireciona para a lista de leads
     }
 
     return view('admin::leads.view', compact('lead')); // Retorna a visualização do lead
 }
+
 
 
 
