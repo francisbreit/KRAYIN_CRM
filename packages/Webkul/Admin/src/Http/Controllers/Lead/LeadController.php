@@ -30,7 +30,12 @@ use Webkul\User\Repositories\UserRepository;
 
 class LeadController extends Controller
 {
-    // O código anterior do construtor e outros métodos permanece o mesmo
+    private $leadRepository;
+
+    public function __construct(LeadRepository $leadRepository)
+    {
+        $this->leadRepository = $leadRepository;
+    }// O código anterior do construtor e outros métodos permanece o mesmo
 
     /**
      * Display a resource.
