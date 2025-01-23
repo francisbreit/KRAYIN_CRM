@@ -51,7 +51,7 @@ class LeadController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(): View|JsonResponse
+    public function index()
     {
         if (request()->ajax()) {
             return datagrid(LeadDataGrid::class)->process();
@@ -195,10 +195,7 @@ class LeadController extends Controller
     /**
      * Display a resource.
      */
-/**
- * Display a specific lead.
- */
-public function view(int $id): View
+    public function view(int $id): View
     {
         $lead = $this->leadRepository->findOrFail($id);
 
@@ -211,11 +208,6 @@ public function view(int $id): View
 
         return view('admin::leads.view', compact('lead'));
     }
-
-
-
-
-
 
     /**
      * Update the specified resource in storage.
