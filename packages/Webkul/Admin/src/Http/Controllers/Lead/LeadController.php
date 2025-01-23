@@ -204,7 +204,7 @@ public function view(int $id): View
 
         if (
             $userIds = bouncer()->getAuthorizedUserIds()
-            || ! in_array($lead->user_id, $userIds)
+            && ! in_array($lead->user_id, $userIds)
         ) {
             return redirect()->route('admin.leads.index');
         }
