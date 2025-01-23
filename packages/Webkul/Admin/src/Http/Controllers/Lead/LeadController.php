@@ -195,24 +195,39 @@ class LeadController extends Controller
     /**
      * Display a resource.
      */
+/**
+ * Display a specific lead.
+ */
 public function view(int $id): View|RedirectResponse
 {
-    $lead = $this->leadRepository->findOrFail($id);
+    try {
+        // Busca o lead pelo ID ou lança uma exceção
+        $lead = $this->leadRepository->findOrFail($id);
 
-    // Verifica se o usuário tem a permissão de administrador
-    if (bouncer()->is(auth()->user())->a('admin')) {
-        return view('admin::leads.view', compact('lead')); // Administradores têm acesso irrestrito
+        // Verifica se o usuário atual é um administrador
+        if (bouncer()->is(auth()->user())->an('admin')) {
+            return view('admin::leads.view', compact('lead'));
+        }
+
+        // Obtém os IDs de usuários autorizados (para não administradores)
+        $userIds = bouncer()->getAuthorizedUserIds() ?? [];
+
+        // Verifica se o usuário atual tem permissão para visualizar o lead
+        if (!in_array($lead->user_id, $userIds)) {
+            // Redireciona para a lista com uma mensagem de erro
+            return redirect()
+                ->route('admin.leads.index')
+                ->with('error', trans('admin::app.leads.unauthorized'));
+        }
+
+        // Retorna a view do lead
+        return view('admin::leads.view', compact('lead'));
+    } catch (\Exception $exception) {
+        // Trata exceções, como lead não encontrado
+        return redirect()
+            ->route('admin.leads.index')
+            ->with('error', trans('admin::app.leads.not-found'));
     }
-
-    // Usuários não administradores
-    $userIds = bouncer()->getAuthorizedUserIds() ?? []; // Garante que $userIds seja sempre um array
-
-    // Verifica se o usuário está autorizado a visualizar este lead
-    if (!in_array($lead->user_id, $userIds)) {
-        return redirect()->route('admin.leads.index'); // Redireciona para a lista de leads se não autorizado
-    }
-
-    return view('admin::leads.view', compact('lead')); // Retorna a visualização do lead
 }
 
 
