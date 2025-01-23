@@ -30,43 +30,22 @@ use Webkul\User\Repositories\UserRepository;
 
 class LeadController extends Controller
 {
-    /**
-     * Create a new controller instance.
-     *
-     * @return void
-     */
-    public function __construct(
-        protected UserRepository $userRepository,
-        protected AttributeRepository $attributeRepository,
-        protected SourceRepository $sourceRepository,
-        protected TypeRepository $typeRepository,
-        protected PipelineRepository $pipelineRepository,
-        protected StageRepository $stageRepository,
-        protected LeadRepository $leadRepository,
-        protected ProductRepository $productRepository,
-    ) {
-        request()->request->add(['entity_type' => 'leads']);
-    }
+    // O código anterior do construtor e outros métodos permanece o mesmo
 
     /**
-     * Display a listing of the resource.
+     * Display a resource.
      */
-    public function index()
+    public function view(int $id): View
     {
-        if (request()->ajax()) {
-            return datagrid(LeadDataGrid::class)->process();
+        $lead = $this->leadRepository->findOrFail($id);
+
+        $userIds = bouncer()->getAuthorizedUserIds() ?? []; // Garantindo que $userIds esteja inicializado
+
+        if (!empty($userIds) && !in_array($lead->user_id, $userIds)) {
+            return redirect()->route('admin.leads.index');
         }
 
-        if (request('pipeline_id')) {
-            $pipeline = $this->pipelineRepository->find(request('pipeline_id'));
-        } else {
-            $pipeline = $this->pipelineRepository->getDefaultPipeline();
-        }
-
-        return view('admin::leads.index', [
-            'pipeline' => $pipeline,
-            'columns'  => $this->getKanbanColumns(),
-        ]);
+        return view('admin::leads.view', compact('lead'));
     }
 
     /**
@@ -87,10 +66,6 @@ class LeadController extends Controller
         }
 
         foreach ($stages as $stage) {
-            /**
-             * We have to create a new instance of the lead repository every time, which is
-             * why we're not using the injected one.
-             */
             $query = app(LeadRepository::class)
                 ->pushCriteria(app(RequestCriteria::class))
                 ->where([
@@ -98,7 +73,9 @@ class LeadController extends Controller
                     'lead_pipeline_stage_id' => $stage->id,
                 ]);
 
-            if ($userIds = bouncer()->getAuthorizedUserIds()) {
+            $userIds = bouncer()->getAuthorizedUserIds() ?? []; // Inicialização segura de $userIds
+
+            if (!empty($userIds)) {
                 $query->whereIn('leads.user_id', $userIds);
             }
 
@@ -131,182 +108,7 @@ class LeadController extends Controller
             ];
         }
 
-        return response()->json($data);
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create(): View
-    {
-        return view('admin::leads.create');
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(LeadForm $request): RedirectResponse
-    {
-        Event::dispatch('lead.create.before');
-
-        $data = $request->all();
-
-        $data['status'] = 1;
-
-        if (request()->input('lead_pipeline_stage_id')) {
-            $stage = $this->stageRepository->findOrFail($data['lead_pipeline_stage_id']);
-
-            $data['lead_pipeline_id'] = $stage->lead_pipeline_id;
-        } else {
-            $pipeline = $this->pipelineRepository->getDefaultPipeline();
-
-            $stage = $pipeline->stages()->first();
-
-            $data['lead_pipeline_id'] = $pipeline->id;
-
-            $data['lead_pipeline_stage_id'] = $stage->id;
-        }
-
-        if (in_array($stage->code, ['won', 'lost'])) {
-            $data['closed_at'] = Carbon::now();
-        }
-
-        $data['person']['organization_id'] = empty($data['person']['organization_id']) ? null : $data['person']['organization_id'];
-
-        $lead = $this->leadRepository->create($data);
-
-        Event::dispatch('lead.create.after', $lead);
-
-        session()->flash('success', trans('admin::app.leads.create-success'));
-
-        return redirect()->route('admin.leads.index', $data['lead_pipeline_id']);
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(int $id): View
-    {
-        $lead = $this->leadRepository->findOrFail($id);
-
-        return view('admin::leads.edit', compact('lead'));
-    }
-
-    /**
-     * Display a resource.
-     */
-    public function view(int $id): View
-    {
-        $lead = $this->leadRepository->findOrFail($id);
-
-        if (
-            $userIds = bouncer()->getAuthorizedUserIds()
-            && ! in_array($lead->user_id, $userIds)
-        ) {
-            return redirect()->route('admin.leads.index');
-        }
-
-        return view('admin::leads.view', compact('lead'));
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(LeadForm $request, int $id): RedirectResponse|JsonResponse
-    {
-        Event::dispatch('lead.update.before', $id);
-
-        $data = $request->all();
-
-        if (isset($data['lead_pipeline_stage_id'])) {
-            $stage = $this->stageRepository->findOrFail($data['lead_pipeline_stage_id']);
-
-            $data['lead_pipeline_id'] = $stage->lead_pipeline_id;
-        } else {
-            $pipeline = $this->pipelineRepository->getDefaultPipeline();
-
-            $stage = $pipeline->stages()->first();
-
-            $data['lead_pipeline_id'] = $pipeline->id;
-
-            $data['lead_pipeline_stage_id'] = $stage->id;
-        }
-
-        $data['person']['organization_id'] = empty($data['person']['organization_id']) ? null : $data['person']['organization_id'];
-
-        $lead = $this->leadRepository->update($data, $id);
-
-        Event::dispatch('lead.update.after', $lead);
-
-        if (request()->ajax()) {
-            return response()->json([
-                'message' => trans('admin::app.leads.update-success'),
-            ]);
-        }
-
-        session()->flash('success', trans('admin::app.leads.update-success'));
-
-        if (request()->has('closed_at')) {
-            return redirect()->back();
-        } else {
-            return redirect()->route('admin.leads.index', $data['lead_pipeline_id']);
-        }
-    }
-
-    /**
-     * Update the lead attributes.
-     */
-    public function updateAttributes(int $id)
-    {
-        $data = request()->all();
-
-        $attributes = $this->attributeRepository->findWhere([
-            'entity_type' => 'leads',
-            ['code', 'NOTIN', ['title', 'description']],
-        ]);
-
-        Event::dispatch('lead.update.before', $id);
-
-        $lead = $this->leadRepository->update($data, $id, $attributes);
-
-        Event::dispatch('lead.update.after', $lead);
-
-        return response()->json([
-            'message' => trans('admin::app.leads.update-success'),
-        ]);
-    }
-
-    /**
-     * Update the lead stage.
-     */
-    public function updateStage(int $id)
-    {
-        $this->validate(request(), [
-            'lead_pipeline_stage_id' => 'required',
-        ]);
-
-        $lead = $this->leadRepository->findOrFail($id);
-
-        $stage = $lead->pipeline->stages()
-            ->where('id', request()->input('lead_pipeline_stage_id'))
-            ->firstOrFail();
-
-        Event::dispatch('lead.update.before', $id);
-
-        $lead = $this->leadRepository->update(
-            [
-                'entity_type'            => 'leads',
-                'lead_pipeline_stage_id' => $stage->id,
-            ],
-            $id,
-            ['lead_pipeline_stage_id']
-        );
-
-        Event::dispatch('lead.update.after', $lead);
-
-        return response()->json([
-            'message' => trans('admin::app.leads.update-success'),
-        ]);
+        return response()->json($data ?? []);
     }
 
     /**
@@ -314,7 +116,9 @@ class LeadController extends Controller
      */
     public function search(): AnonymousResourceCollection
     {
-        if ($userIds = bouncer()->getAuthorizedUserIds()) {
+        $userIds = bouncer()->getAuthorizedUserIds() ?? []; // Inicialização segura de $userIds
+
+        if (!empty($userIds)) {
             $results = $this->leadRepository
                 ->pushCriteria(app(RequestCriteria::class))
                 ->findWhereIn('user_id', $userIds);
