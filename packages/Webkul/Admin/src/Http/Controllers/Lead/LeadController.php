@@ -196,23 +196,18 @@ class LeadController extends Controller
      * Display a resource.
      */
 public function view(int $id): View|RedirectResponse
-{
-    $lead = $this->leadRepository->findOrFail($id);
+    {
+        $lead = $this->leadRepository->findOrFail($id);
 
-    $userIds = bouncer()->getAuthorizedUserIds() ?? []; // Garante que $userIds seja sempre um array
-
-    if (!in_array($lead->user_id, $userIds)) {
-        return redirect()->route('admin.leads.index'); // Redireciona para a lista de leads
-    }
- if (
+        if (
             $userIds = bouncer()->getAuthorizedUserIds()
             && ! in_array($lead->user_id, $userIds)
         ) {
             return redirect()->route('admin.leads.index');
         }
 
-    return view('admin::leads.view', compact('lead')); // Retorna a visualização do lead
-}
+        return view('admin::leads.view', compact('lead'));
+    }
 
 
 
