@@ -199,11 +199,9 @@ public function view(int $id): View
 {
     $lead = $this->leadRepository->findOrFail($id);
 
-    // Obtém os IDs autorizados
-    $userIds = bouncer()->getAuthorizedUserIds();
 
-    // Verifica se o usuário não está autorizado a visualizar o lead
-    if (!$userIds || !in_array($lead->user_id, $userIds)) {
+    // Verifica se o usuário atual está autorizado a visualizar o lead
+    if (!in_array($lead->user_id, $userIds)) {
         return redirect()->route('admin.leads.index'); // Redireciona para a lista de leads
     }
 
