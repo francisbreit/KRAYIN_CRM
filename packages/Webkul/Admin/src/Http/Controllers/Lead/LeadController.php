@@ -199,10 +199,9 @@ public function view(int $id): View|RedirectResponse
 {
     $lead = $this->leadRepository->findOrFail($id);
 
-    // Verifica se o usuário é administrador (exemplo: hasRole('admin'))
-    if (auth()->user()->hasRole('admin')) {
-        // Administradores têm acesso irrestrito
-        return view('admin::leads.view', compact('lead'));
+    // Verifica se o usuário tem a permissão de administrador
+    if (bouncer()->is(auth()->user())->a('admin')) {
+        return view('admin::leads.view', compact('lead')); // Administradores têm acesso irrestrito
     }
 
     // Usuários não administradores
@@ -215,6 +214,7 @@ public function view(int $id): View|RedirectResponse
 
     return view('admin::leads.view', compact('lead')); // Retorna a visualização do lead
 }
+
 
 
 
