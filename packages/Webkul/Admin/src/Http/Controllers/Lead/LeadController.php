@@ -205,7 +205,7 @@ public function view(int $id): View|RedirectResponse
         $lead = $this->leadRepository->findOrFail($id);
 
         // Verifica se o usuário atual é um administrador
-        if (bouncer()->is(auth()->user())->an('admin')) {
+        if (auth()->user()->isAn('admin'))
             return view('admin::leads.view', compact('lead'));
         }
 
