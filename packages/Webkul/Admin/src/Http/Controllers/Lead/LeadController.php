@@ -195,11 +195,11 @@ class LeadController extends Controller
     /**
      * Display a resource.
      */
-    public function view(int $id): View
+  public function view(int $id): View
 {
     $lead = $this->leadRepository->findOrFail($id);
 
-    $userIds = bouncer()->getAuthorizedUserIds();
+    $userIds = bouncer()->getAuthorizedUserIds() ?? []; // Garante que $userIds seja sempre um array
 
     if (!in_array($lead->user_id, $userIds)) {
         return redirect()->route('admin.leads.index');
