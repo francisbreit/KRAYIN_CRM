@@ -201,18 +201,21 @@ public function view(int $id): View|RedirectResponse
 
     // Verifica se o usuário é administrador (exemplo: hasRole('admin'))
     if (auth()->user()->hasRole('admin')) {
-        return view('admin::leads.view', compact('lead')); // Permite acesso direto para administradores
+        // Administradores têm acesso irrestrito
+        return view('admin::leads.view', compact('lead'));
     }
 
+    // Usuários não administradores
     $userIds = bouncer()->getAuthorizedUserIds() ?? []; // Garante que $userIds seja sempre um array
 
-    // Verifica se o usuário tem permissão para visualizar o lead
+    // Verifica se o usuário está autorizado a visualizar este lead
     if (!in_array($lead->user_id, $userIds)) {
-        return redirect()->route('admin.leads.index'); // Redireciona se não autorizado
+        return redirect()->route('admin.leads.index'); // Redireciona para a lista de leads se não autorizado
     }
 
     return view('admin::leads.view', compact('lead')); // Retorna a visualização do lead
 }
+
 
 
 
