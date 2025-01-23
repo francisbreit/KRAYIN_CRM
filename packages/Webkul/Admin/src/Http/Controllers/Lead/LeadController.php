@@ -199,28 +199,19 @@ public function view(int $id): View|RedirectResponse
 {
     $lead = $this->leadRepository->findOrFail($id);
 
-    // Verifica se o usuário está autenticado
-    $currentUser = auth()->user();
-    if (!$currentUser) {
-        return redirect()->route('admin.leads.index'); // Redireciona se não estiver autenticado
-    }
-
-    // Verifica se o usuário é admin
-    $isAdmin = method_exists($currentUser, 'is') && $currentUser->is('admin'); // Garante que o método is existe
-
     // Obtemos os IDs de usuários autorizados
-    $userIds = bouncer()->getAuthorizedUserIds() ?? []; // Garante que $userIds seja sempre um array
+    $userIds = bouncer()->getAuthorizedUserIds() ?? []; // Garante que $userIds seja um array válido
 
-    // Permitir visualização apenas se for admin ou o lead pertencer ao usuário autorizado
+    // Verifica se o lead é acessível para o usuário atual
     if (
-        !$isAdmin &&            // Não é admin
-        !in_array($lead->user_id, $userIds) // O lead não pertence ao usuário
+        !in_array($lead->user_id, $userIds) // O lead não pertence ao usuário autorizado
     ) {
         return redirect()->route('admin.leads.index'); // Redireciona para a lista de leads
     }
 
     return view('admin::leads.view', compact('lead')); // Retorna a visualização do lead
 }
+
 
 
     /**
