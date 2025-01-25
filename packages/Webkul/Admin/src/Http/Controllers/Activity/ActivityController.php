@@ -44,81 +44,36 @@ class ActivityController extends Controller
      */
     public function get(): JsonResponse
     {
-        if (! request()->has('view_type')) {
+        if (!request()->has('view_type')) {
             return datagrid(ActivityDataGrid::class)->process();
         }
 
         $startDate = request()->get('startDate')
-            ? Carbon::createFromTimeString(request()->get('startDate').' 00:00:01')
-            : Carbon::now()->startOfWeek()->format('Y-m-d H:i:s');
+            ? Carbon::createFromTimeString(request()->get('startDate') . ' 00:00:01')
+            : Carbon::now()->startOfWeek();
 
         $endDate = request()->get('endDate')
-            ? Carbon::createFromTimeString(request()->get('endDate').' 23:59:59')
-            : Carbon::now()->endOfWeek()->format('Y-m-d H:i:s');
+            ? Carbon::createFromTimeString(request()->get('endDate') . ' 23:59:59')
+            : Carbon::now()->endOfWeek();
 
-        $activities = $this->activityRepository->getActivities([$startDate, $endDate])->toArray();
+        $activities = $this->activityRepository->getActivities([$startDate, $endDate])
+            ->map(function ($activity) {
+                // Ajustar fuso horário e formato de exibição
+                $activity['created_at'] = Carbon::parse($activity['created_at'])
+                    ->setTimezone('America/Sao_Paulo')
+                    ->format('d-m-Y H:i:s');
+
+                $activity['updated_at'] = Carbon::parse($activity['updated_at'])
+                    ->setTimezone('America/Sao_Paulo')
+                    ->format('d-m-Y H:i:s');
+
+                return $activity;
+            })
+            ->toArray();
 
         return response()->json([
             'activities' => $activities,
         ]);
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(): RedirectResponse|JsonResponse
-    {
-        $this->validate(request(), [
-            'type'          => 'required',
-            'comment'       => 'required_if:type,note',
-            'schedule_from' => 'required_unless:type,note,file',
-            'schedule_to'   => 'required_unless:type,note,file',
-            'file'          => 'required_if:type,file',
-        ]);
-
-        if (request('type') === 'meeting') {
-            /**
-             * Check if meeting is overlapping with other meetings.
-             */
-            $isOverlapping = $this->activityRepository->isDurationOverlapping(
-                request()->input('schedule_from'),
-                request()->input('schedule_to'),
-                request()->input('participants'),
-                request()->input('id')
-            );
-
-            if ($isOverlapping) {
-                if (request()->ajax()) {
-                    return response()->json([
-                        'message' => trans('admin::app.activities.overlapping-error'),
-                    ], 400);
-                }
-
-                session()->flash('success', trans('admin::app.activities.overlapping-error'));
-
-                return redirect()->back();
-            }
-        }
-
-        Event::dispatch('activity.create.before');
-
-        $activity = $this->activityRepository->create(array_merge(request()->all(), [
-            'is_done' => request('type') == 'note' ? 1 : 0,
-            'user_id' => auth()->guard('user')->user()->id,
-        ]));
-
-        Event::dispatch('activity.create.after', $activity);
-
-        if (request()->ajax()) {
-            return response()->json([
-                'data'    => new ActivityResource($activity),
-                'message' => trans('admin::app.activities.create-success'),
-            ]);
-        }
-
-        session()->flash('success', trans('admin::app.activities.create-success'));
-
-        return redirect()->back();
     }
 
     /**
@@ -128,34 +83,20 @@ class ActivityController extends Controller
     {
         $activity = $this->activityRepository->findOrFail($id);
 
+        // Ajustar fuso horário e formato para exibição
+        $activity->created_at = Carbon::parse($activity->created_at)
+            ->setTimezone('America/Sao_Paulo')
+            ->format('d-m-Y H:i:s');
+
+        $activity->updated_at = Carbon::parse($activity->updated_at)
+            ->setTimezone('America/Sao_Paulo')
+            ->format('d-m-Y H:i:s');
+
         $leadId = old('lead_id') ?? optional($activity->leads()->first())->id;
 
         $lookUpEntityData = $this->attributeRepository->getLookUpEntity('leads', $leadId);
 
         return view('admin::activities.edit', compact('activity', 'lookUpEntityData'));
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update($id): RedirectResponse|JsonResponse
-    {
-        Event::dispatch('activity.update.before', $id);
-
-        $activity = $this->activityRepository->update(request()->all(), $id);
-
-        Event::dispatch('activity.update.after', $activity);
-
-        if (request()->ajax()) {
-            return response()->json([
-                'data'    => new ActivityResource($activity),
-                'message' => trans('admin::app.activities.update-success'),
-            ]);
-        }
-
-        session()->flash('success', trans('admin::app.activities.update-success'));
-
-        return redirect()->route('admin.activities.index');
     }
 
     /**
@@ -181,20 +122,6 @@ class ActivityController extends Controller
     }
 
     /**
-     * Download file from storage.
-     */
-    public function download(int $id): StreamedResponse
-    {
-        try {
-            $file = $this->fileRepository->findOrFail($id);
-
-            return Storage::download($file->path);
-        } catch (\Exception $exception) {
-            abort(404);
-        }
-    }
-
-    /*
      * Remove the specified resource from storage.
      */
     public function destroy(int $id): JsonResponse
@@ -214,32 +141,6 @@ class ActivityController extends Controller
         } catch (\Exception $exception) {
             return response()->json([
                 'message' => trans('admin::app.activities.destroy-failed'),
-            ], 400);
-        }
-    }
-
-    /**
-     * Mass Delete the specified resources.
-     */
-    public function massDestroy(MassDestroyRequest $massDestroyRequest): JsonResponse
-    {
-        $activities = $this->activityRepository->findWhereIn('id', $massDestroyRequest->input('indices'));
-
-        try {
-            foreach ($activities as $activity) {
-                Event::dispatch('activity.delete.before', $activity->id);
-
-                $this->activityRepository->delete($activity->id);
-
-                Event::dispatch('activity.delete.after', $activity->id);
-            }
-
-            return response()->json([
-                'message' => trans('admin::app.activities.mass-destroy-success'),
-            ]);
-        } catch (\Exception $exception) {
-            return response()->json([
-                'message' => trans('admin::app.activities.mass-delete-failed'),
             ], 400);
         }
     }
