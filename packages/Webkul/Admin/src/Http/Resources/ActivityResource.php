@@ -3,6 +3,7 @@
 namespace Webkul\Admin\Http\Resources;
 
 use Illuminate\Http\Resources\Json\JsonResource;
+use Carbon\Carbon;
 
 class ActivityResource extends JsonResource
 {
