@@ -56,11 +56,13 @@
                         disable: this.disable ?? [],
                         minDate: this.minDate ?? '',
                         maxDate: this.maxDate ?? '',
-                        altFormat: "Y-m-d",
-                        dateFormat: "Y-m-d",
+                        altInput: true, // Ativa o uso de altFormat
+                        altFormat: "d-m-Y", // Exibição amigável no campo
+                        dateFormat: "Y-m-d", // Valor lógico para envio
                         weekNumbers: true,
 
                         onChange: function(selectedDates, dateStr, instance) {
+                            // Emite o valor lógico
                             self.$emit("onChange", dateStr);
                         }
                     };
