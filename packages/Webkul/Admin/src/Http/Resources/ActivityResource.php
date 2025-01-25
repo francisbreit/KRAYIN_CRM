@@ -33,18 +33,15 @@ class ActivityResource extends JsonResource
             'updated_at'    => $this->formatDate($this->updated_at),
         ];
     }
-    
 
     /**
-     * Helper function to format dates.
+     * Format the date to 'Y-m-d H:i:s' in the São Paulo timezone.
      *
      * @param  string|null $date
      * @return string|null
      */
-    protected function formatDate($date)
+    private function formatDate($date)
     {
-        return $date 
-            ? \Carbon\Carbon::parse($date)->timezone('America/Sao_Paulo')->format('d/m/Y H:i:s') 
-            : null;
+        return $date ? Carbon::parse($date)->timezone('America/Sao_Paulo')->format('Y-m-d H:i:s') : null;
     }
 }
