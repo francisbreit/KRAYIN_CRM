@@ -3,7 +3,6 @@
 namespace Webkul\Admin\Http\Controllers\Contact\Persons;
 
 use Illuminate\Support\Facades\DB;
-use Carbon\Carbon;
 use Webkul\Activity\Repositories\ActivityRepository;
 use Webkul\Admin\Http\Controllers\Controller;
 use Webkul\Admin\Http\Resources\ActivityResource;
@@ -77,26 +76,13 @@ class ActivityController extends Controller
                         'name'       => $attachment->name,
                         'path'       => $attachment->path,
                         'url'        => $attachment->url,
-                        'created_at' => $this->formatDate($attachment->created_at),
-                        'updated_at' => $this->formatDate($attachment->updated_at),
+                        'created_at' => $attachment->created_at,
+                        'updated_at' => $attachment->updated_at,
                     ];
                 }),
-                'created_at'    => $this->formatDate($email->created_at),
-                'updated_at'    => $this->formatDate($email->updated_at),
+                'created_at'    => $email->created_at,
+                'updated_at'    => $email->updated_at,
             ];
         }))->sortByDesc('id')->sortByDesc('created_at');
-    }
-
-    /**
-     * Format the date to pt_BR timezone and display format.
-     *
-     * @param  string|null  $date
-     * @return string|null
-     */
-    private function formatDate($date)
-    {
-        return $date
-            ? Carbon::parse($date)->setTimezone('America/Sao_Paulo')->format('d-m-Y H:i:s')
-            : null;
     }
 }
