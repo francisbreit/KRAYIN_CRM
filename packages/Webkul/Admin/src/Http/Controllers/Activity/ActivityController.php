@@ -50,11 +50,11 @@ class ActivityController extends Controller
 
         $startDate = request()->get('startDate')
             ? Carbon::createFromTimeString(request()->get('startDate').' 00:00:01')
-            : Carbon::now()->startOfWeek()->setTimezone('America/Sao_Paulo') ->format('d-m-Y H:i:s');
+            : Carbon::now()->startOfWeek()->format('Y-m-d H:i:s');
 
         $endDate = request()->get('endDate')
             ? Carbon::createFromTimeString(request()->get('endDate').' 23:59:59')
-            : Carbon::now()->endOfWeek()->setTimezone('America/Sao_Paulo') ->format('d-m-Y H:i:s');
+            : Carbon::now()->endOfWeek()->format('Y-m-d H:i:s');
 
         $activities = $this->activityRepository->getActivities([$startDate, $endDate])->toArray();
 
