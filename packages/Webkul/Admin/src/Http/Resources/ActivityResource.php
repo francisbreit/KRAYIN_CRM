@@ -32,6 +32,7 @@ class ActivityResource extends JsonResource
             'updated_at'    => $this->formatDate($this->updated_at),
         ];
     }
+    
 
     /**
      * Helper function to format dates.
