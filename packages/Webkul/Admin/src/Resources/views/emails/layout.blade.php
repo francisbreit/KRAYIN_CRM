@@ -1,36 +1,87 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
-    <head>
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>{{ config('app.name') }} Email</title>
 
-        <link rel="preconnect" href="https://fonts.googleapis.com">
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    </head>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-    <body style="font-family: inter;">
-        <div style="max-width: 640px; margin-left: auto; margin-right: auto;">
-            <div style="padding: 30px;">
-                <!-- Email Header -->
-                <div style="margin-bottom: 45px;">
-                    <a href="{{ config('app.url') }}">
-                        <img
-                            src="{{ vite()->asset('images/logo.svg') }}"
-                            alt="{{ config('app.name') }}"
-                            style="height: 40px; width: 110px;"
-                        />
-                    </a>
-                </div>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f4f7fc;
+            margin: 0;
+            padding: 0;
+        }
 
-                <!-- Email Content -->
-                {{ $slot }}
+        .container {
+            width: 100%;
+            max-width: 640px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
 
-                <!-- Email Footer -->
-                <p style="font-size: 16px;color: #202B3C;line-height: 24px;">
-                    @lang('admin::app.emails.common.cheers', ['app_name' => config('app.name')])
-                </p>
-            </div>
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .header a {
+            text-decoration: none;
+        }
+
+        .content {
+            color: #333;
+            line-height: 1.6;
+            font-size: 16px;
+        }
+
+        .footer {
+            margin-top: 30px;
+            font-size: 14px;
+            text-align: center;
+            color: #777;
+        }
+
+        .footer p {
+            margin: 10px 0;
+        }
+
+        .footer a {
+            color: #4C75A3;
+            text-decoration: none;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <!-- Email Header -->
+        <div class="header">
+            <a href="{{ config('app.url') }}" style="font-size: 24px; color: #4C75A3; font-weight: 600;">
+                {{ config('app.name') }}
+            </a>
         </div>
-    </body>
+
+        <!-- Email Content -->
+        <div class="content">
+            {{ $slot }}
+        </div>
+
+        <!-- Email Footer -->
+        <div class="footer">
+            <p>@lang('admin::app.emails.common.cheers', ['app_name' => config('app.name')])</p>
+            <p>Se você não reconhece esta ação, por favor, <a href="{{ config('app.url') }}/support">entre em contato com o suporte</a>.</p>
+        </div>
+    </div>
+
+</body>
 </html>
