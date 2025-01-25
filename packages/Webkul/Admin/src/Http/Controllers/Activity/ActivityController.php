@@ -48,28 +48,15 @@ class ActivityController extends Controller
             return datagrid(ActivityDataGrid::class)->process();
         }
 
-         $startDate = request()->get('startDate')
-            ? Carbon::createFromTimeString(request()->get('startDate') . ' 00:00:01')
-            : Carbon::now()->startOfWeek();
+        $startDate = request()->get('startDate')
+            ? Carbon::createFromTimeString(request()->get('startDate').' 00:00:01')
+            : Carbon::now()->startOfWeek()->setTimezone('America/Sao_Paulo') ->format('d-m-Y H:i:s');
 
         $endDate = request()->get('endDate')
-            ? Carbon::createFromTimeString(request()->get('endDate') . ' 23:59:59')
-            : Carbon::now()->endOfWeek();
+            ? Carbon::createFromTimeString(request()->get('endDate').' 23:59:59')
+            : Carbon::now()->endOfWeek()->setTimezone('America/Sao_Paulo') ->format('d-m-Y H:i:s');
 
-        $activities = $this->activityRepository->getActivities([$startDate, $endDate])
-            ->map(function ($activity) {
-                // Ajustar fuso horário e formato de exibição
-                $activity['created_at'] = Carbon::parse($activity['created_at'])
-                    ->setTimezone('America/Sao_Paulo')
-                    ->format('d-m-Y H:i:s');
-
-                $activity['updated_at'] = Carbon::parse($activity['updated_at'])
-                    ->setTimezone('America/Sao_Paulo')
-                    ->format('d-m-Y H:i:s');
-
-                return $activity;
-            })
-            ->toArray();
+        $activities = $this->activityRepository->getActivities([$startDate, $endDate])->toArray();
 
         return response()->json([
             'activities' => $activities,
