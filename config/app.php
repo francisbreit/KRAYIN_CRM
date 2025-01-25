@@ -82,7 +82,8 @@ return [
     |
      */
 
-    'timezone' => env('APP_TIMEZONE', 'Asia/Kolkata'),
+     /* 'timezone' => env('APP_TIMEZONE', 'Asia/Kolkata'), */
+    'timezone' => 'America/Sao_Paulo',
 
     /*
     |--------------------------------------------------------------------------
@@ -95,7 +96,8 @@ return [
     |
      */
 
-    'locale' => env('APP_LOCALE', 'en'),
+    /* 'locale' => env('APP_LOCALE', 'en'), */
+    'locale' => 'pt_BR',
 
     /*
     |--------------------------------------------------------------------------
