@@ -22,26 +22,26 @@ class ActivityResource extends JsonResource
             'type'          => $this->type,
             'comment'       => $this->comment,
             'additional'    => is_array($this->resource->additional) ? $this->resource->additional : json_decode($this->resource->additional, true),
-            'schedule_from' => $this->formatDate($this->schedule_from),
-            'schedule_to'   => $this->formatDate($this->schedule_to),
+            'schedule_from' => $this->convertToSaoPaulo($this->schedule_from),
+            'schedule_to'   => $this->convertToSaoPaulo($this->schedule_to),
             'is_done'       => $this->is_done,
             'user'          => new UserResource($this->user),
             'files'         => ActivityFileResource::collection($this->files),
             'participants'  => ActivityParticipantResource::collection($this->participants),
             'location'      => $this->location,
-            'created_at'    => $this->formatDate($this->created_at),
-            'updated_at'    => $this->formatDate($this->updated_at),
+            'created_at'    => $this->convertToSaoPaulo($this->created_at),
+            'updated_at'    => $this->convertToSaoPaulo($this->updated_at),
         ];
     }
 
     /**
-     * Format the date to 'Y-m-d H:i:s' in the São Paulo timezone.
+     * Convert the date to 'America/Sao_Paulo' timezone without altering its value.
      *
      * @param  string|null $date
      * @return string|null
      */
-    private function formatDate($date)
+    private function convertToSaoPaulo($date)
     {
-        return $date ? Carbon::parse($date)->timezone('America/Sao_Paulo')->format('Y-m-d H:i:s') : null;
+        return $date ? Carbon::parse($date, 'UTC')->timezone('America/Sao_Paulo')->format('d-m-Y H:i:s') : null;
     }
 }
