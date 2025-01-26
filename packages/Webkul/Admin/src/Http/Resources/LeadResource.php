@@ -36,14 +36,15 @@ class LeadResource extends JsonResource
         ];
    }
 
-  /**
-     * Convert the date to 'America/Sao_Paulo' timezone without altering its value.
-     *
-     * @param  string|null $date
-     * @return string|null
-     */
-    private function convertToSaoPaulo($date)
-    {
-        return $date ? Carbon::parse($date, 'UTC')->timezone('America/Sao_Paulo')->format('Y-m-d H:i:s') : null;
-    }    
+ /**
+ * Subtract 3 hours from the given date.
+ *
+ * @param  string|null $date
+ * @return string|null
+ */
+private function convertToSaoPaulo($date)
+{
+    return $date ? Carbon::parse($date)->subHours(3)->format('Y-m-d H:i:s') : null;
+}
+
 }
