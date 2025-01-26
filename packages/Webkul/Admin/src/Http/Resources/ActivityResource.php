@@ -3,7 +3,6 @@
 namespace Webkul\Admin\Http\Resources;
 
 use Illuminate\Http\Resources\Json\JsonResource;
-use Carbon\Carbon;
 
 class ActivityResource extends JsonResource
 {
@@ -22,29 +21,15 @@ class ActivityResource extends JsonResource
             'type'          => $this->type,
             'comment'       => $this->comment,
             'additional'    => is_array($this->resource->additional) ? $this->resource->additional : json_decode($this->resource->additional, true),
-            'schedule_from' => $this->convertToSaoPaulo($this->schedule_from),
-            'schedule_to'   => $this->convertToSaoPaulo($this->schedule_to),
+            'schedule_from' => $this->schedule_from,
+            'schedule_to'   => $this->schedule_to,
             'is_done'       => $this->is_done,
             'user'          => new UserResource($this->user),
             'files'         => ActivityFileResource::collection($this->files),
             'participants'  => ActivityParticipantResource::collection($this->participants),
             'location'      => $this->location,
-            'created_at'    => $this->convertToSaoPaulo($this->created_at),
-            'updated_at'    => $this->convertToSaoPaulo($this->updated_at),
+            'created_at'    => $this->created_at,
+            'updated_at'    => $this->updated_at,
         ];
     }
-
-
-
- /**
- * Subtract 3 hours from the given date.
- *
- * @param  string|null $date
- * @return string|null
- */
-private function convertToSaoPaulo($date)
-{
-    return $date ? Carbon::parse($date)->subHours(3)->format('Y-m-d H:i:s') : null;
-}
-
 }
