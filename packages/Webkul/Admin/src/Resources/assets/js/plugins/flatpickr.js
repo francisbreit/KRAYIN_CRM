@@ -12,14 +12,14 @@ export default {
         window.Flatpickr = Flatpickr;
 
         const setLocaleFromLang = () => {
-            const lang = document.documentElement.lang || "en";
+            const lang = document.documentElement.lang || "pt_BR";
 
             const localeMap = {
                 es: Spanish,
                 ar: Arabic,
                 fa: Persian,
                 tr: Turkish,
-                pt: Portuguese
+                pt_BR: Portuguese
             };
 
             const locale = localeMap[lang] || null;
