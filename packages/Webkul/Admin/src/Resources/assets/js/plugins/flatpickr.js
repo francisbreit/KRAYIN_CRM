@@ -4,8 +4,8 @@ import { Spanish } from "flatpickr/dist/l10n/es.js";
 import { Arabic } from "flatpickr/dist/l10n/ar.js";
 import { Persian } from "flatpickr/dist/l10n/fa.js";
 import { Turkish } from "flatpickr/dist/l10n/tr.js";
-import { Portuguese as PortugueseBrazil } from "flatpickr/dist/l10n/pt.js"; // Português do Brasil
-import { Portuguese as PortuguesePortugal } from "flatpickr/dist/l10n/pt.js"; // Português de Portugal
+import { Portuguese } from "flatpickr/dist/l10n/pt.js"
+
 
 export default {
     install: (app) => {
@@ -19,8 +19,7 @@ export default {
                 ar: Arabic,
                 fa: Persian,
                 tr: Turkish,
-                "pt-BR": PortugueseBrazil,
-                pt: PortuguesePortugal
+                pt: Portuguese
             };
 
             const locale = localeMap[lang] || null;
