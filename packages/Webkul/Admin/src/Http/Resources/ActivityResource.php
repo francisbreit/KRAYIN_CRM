@@ -42,6 +42,6 @@ class ActivityResource extends JsonResource
      */
     private function convertToSaoPaulo($date)
     {
-        return $date ? Carbon::parse($date, 'UTC')->timezone('America/Sao_Paulo')->format('d-m-Y H:i:s') : null;
+        return $date ? Carbon::parse($date, 'UTC')->timezone('America/Sao_Paulo')->format('Y-m-d H:i:s') : null;
     }
 }
