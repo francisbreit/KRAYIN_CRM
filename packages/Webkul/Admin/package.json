@@ -23,7 +23,7 @@
         "mitt": "^3.0.1",
         "vee-validate": "^4.9.1",
         "vue-cal": "^4.9.0",
-        "vue-flatpickr": "^2.3.0",
+        "vue-flatpickr-component": "^11.0.5",
         "vuedraggable": "^4.1.0"
     }
 }
