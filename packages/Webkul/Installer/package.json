@@ -19,6 +19,6 @@
     "@vitejs/plugin-vue": "^4.2.3",
     "mitt": "^3.0.0",
     "vee-validate": "^4.9.1",
-    "vue-flatpickr": "^2.3.0"
+    "vue-flatpickr-component": "^11.0.5"
   }
 }
