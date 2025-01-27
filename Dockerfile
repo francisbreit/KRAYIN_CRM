@@ -1,18 +1,21 @@
 FROM php:8.3-apache
 
-# Instalação de dependências
+# Instalação de dependências do sistema
 RUN apt-get update && apt-get install -y \
     apparmor-utils \
     nano \
     coreutils \
     git \
     unzip \
+    curl \
     libpng-dev \
     libjpeg62-turbo-dev \
     libfreetype6-dev \
     libzip-dev \
     libicu-dev \
     zlib1g-dev \
+    nodejs \
+    npm \
     && rm -rf /var/lib/apt/lists/* \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install gd pdo pdo_mysql zip intl calendar
@@ -53,6 +56,10 @@ RUN composer install --no-interaction --prefer-dist --optimize-autoloader
 RUN php artisan key:generate --force
 RUN composer require krayin/rest-api --no-interaction
 RUN php artisan krayin-rest-api:install --no-interaction
+
+# Instalação e build do frontend
+RUN npm install
+RUN npm run build
 
 # Configuração de permissões
 RUN chown -R www-data:www-data /var/www/html/krayin
