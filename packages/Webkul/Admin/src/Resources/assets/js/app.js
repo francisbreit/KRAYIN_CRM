@@ -7,6 +7,7 @@ import.meta.glob(["../images/**", "../fonts/**"]);
  * Main vue bundler.
  */
 import { createApp } from "vue/dist/vue.esm-bundler";
+import flatpickr from 'flatpickr'; // Importação do Flatpickr
 
 /**
  * Main root application registry.
@@ -15,13 +16,29 @@ window.app = createApp({
     data() {
         return {
             isMenuActive: false,
-
             hoveringMenu: '',
         };
     },
 
     created() {
         window.addEventListener('click', this.handleFocusOut);
+
+        // Configurar fallback manual para tradução no Flatpickr
+        document.addEventListener('DOMContentLoaded', () => {
+            flatpickr(".date-input", {
+                locale: {
+                    firstDayOfWeek: 1,
+                    weekdays: {
+                        shorthand: ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'],
+                        longhand: ['Domingo', 'Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'Sábado']
+                    },
+                    months: {
+                        shorthand: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'],
+                        longhand: ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro']
+                    }
+                }
+            });
+        });
     },
 
     beforeDestroy() {
@@ -52,13 +69,11 @@ window.app = createApp({
             }
 
             const parentElement = event.currentTarget.parentElement;
-             
+
             if (parentElement.classList.contains('sidebar-collapsed')) {
                 parentElement.classList.remove('sidebar-collapsed');
-                
                 parentElement.classList.add('sidebar-not-collapsed');
             }
-
         },
 
         handleMouseLeave(event) {
@@ -67,10 +82,9 @@ window.app = createApp({
             }
 
             const parentElement = event.currentTarget.parentElement;
-             
+
             if (parentElement.classList.contains('sidebar-not-collapsed')) {
                 parentElement.classList.remove('sidebar-not-collapsed');
-
                 parentElement.classList.add('sidebar-collapsed');
             }
         },
@@ -78,17 +92,13 @@ window.app = createApp({
         handleFocusOut(event) {
             const sidebar = this.$refs.sidebar;
 
-            if (
-                sidebar && 
-                !sidebar.contains(event.target)
-            ) {
+            if (sidebar && !sidebar.contains(event.target)) {
                 this.isMenuActive = false;
 
                 const parentElement = sidebar.parentElement;
 
                 if (parentElement.classList.contains('sidebar-not-collapsed')) {
                     parentElement.classList.remove('sidebar-not-collapsed');
-
                     parentElement.classList.add('sidebar-collapsed');
                 }
             }
@@ -128,4 +138,3 @@ app.directive("debounce", Debounce);
 app.directive("safe-html", DOMPurify);
 
 export default app;
-
