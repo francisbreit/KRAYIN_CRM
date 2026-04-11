@@ -118,7 +118,9 @@ class LeadController extends Controller
                     'pipeline.stages',
                     'stage',
                     'attribute_values',
-                ])->paginate(500)),
+                ])
+                ->orderBy('leads.id', 'desc') // <--- Adicionado para ordem decrescente no Kanban                                
+                ->paginate(500)),
 
                 'meta' => [
                     'current_page' => $paginator->currentPage(),
